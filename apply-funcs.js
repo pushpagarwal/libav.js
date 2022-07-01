@@ -176,8 +176,16 @@ function decls(f, meta) {
             outp += lastComment + line.slice(11) + ";\n";
         }
     }
-    outp = inp.replace("@DECLS", outp);
+    inp = inp.replace("@DECLS", outp);
 
+    /* output enums also */
+    outp = "\n"
+    funcs.enums.forEach((ed)=>{
+        ed.names.forEach((n)=>{
+            outp += `    ${n}: number;\n`;
+        })
+    });
+    outp = inp.replace("@ENUMS", outp);
     fs.writeFileSync("libav.types.d.ts", outp);
 })();
 
@@ -191,7 +199,15 @@ function decls(f, meta) {
         outp.push(decl);
     }, true);
 
-    outp = inp.replace("@FUNCS", s(outp)).replace(/@VER/g, ver);
+    inp = inp.replace("@FUNCS", s(outp)).replace(/@VER/g, ver);
+
+    /* output enums also */
+    outp = "\n"
+    funcs.enums.forEach((ed)=>{
+        outp += `            // ${ed.type}\n` + 
+        `            enume(["${ed.names.join('",\n                "')}"],${ed.first})\n`
+    });
+    outp = inp.replace("@ENUMS", outp);
 
     fs.writeFileSync("libav-" + ver + ".js", outp);
 })();
